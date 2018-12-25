@@ -109,10 +109,12 @@
 <meta property="og:site_name" content="一路向北">
 <meta property="og:description" content="Android基础知识整理">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-12-25T01:36:17.566Z">
+<meta property="og:image" content="http://yoururl.com/images/activytyLiftCircle.png">
+<meta property="og:updated_time" content="2018-12-25T02:35:53.941Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android基础">
 <meta name="twitter:description" content="Android基础知识整理">
+<meta name="twitter:image" content="http://yoururl.com/images/activytyLiftCircle.png">
 
 
 
@@ -319,7 +321,7 @@
                 
               
 
-              <time title="创建时间：2018-12-25 09:23:25 / 修改时间：09:36:17" itemprop="dateCreated datePublished" datetime="2018-12-25T09:23:25+08:00">2018-12-25</time>
+              <time title="创建时间：2018-12-25 09:23:25 / 修改时间：10:35:53" itemprop="dateCreated datePublished" datetime="2018-12-25T09:23:25+08:00">2018-12-25</time>
             
 
             
@@ -357,7 +359,31 @@
       
 
       
-        <p>Android基础知识整理</p>
+        <p>Android基础知识整理<br><a id="more"></a></p>
+<h2 id="四大组件"><a href="#四大组件" class="headerlink" title="四大组件"></a>四大组件</h2><h3 id="Activity"><a href="#Activity" class="headerlink" title="Activity"></a>Activity</h3><h4 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">onCreate() -&gt; onStart() -&gt; onResume -&gt; onPause() -&gt; onStop -&gt; onDestory()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/activytyLiftCircle.png" alt="avatar"></p>
+<blockquote>
+<p>注意</p>
+<ul>
+<li>onPause()：表示activity正在停止，此时可以做一些存储数据，停止动画等工作，注意不能太耗时，因为这会影响到新activity的显示，onPause必须先执行完，新的activity的onResume才会执行</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>当activity中弹出dialog对话框的时候，activity不会回调onPause。然而当activity启动dialog风格的activity的时候，此activity会回调onPause函数</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>系统资源不足导致activity被回收，activity会销毁，其onPause，onStop，onDestory被依次调用，由于activity是在异常情况下终止的，系统会调用onSaveInstance来保存当前activity状态，这个方法的调用时机是在onStop之前。与onPause没有既定的时序关系，当activity重新创建后，系统会调用onRestoreInstanceState，并且把activity销毁时onSaveInstanceState方法保存的Bundle对象作为参数同时传递给onRestoreInstanceState和onCreate方法。onRestoreInstanceState()会在onStart()方法后回调。在onSaveInstanceState和onRestoreInstanceState方法中，系统自动为我们做了一些恢复工作，如：文本框（EditeText）中用户输入的数据，ListView滚动的位置等，这些view相关的状态系统都能够默认为我们恢复。可以查看view源码，和activity一样，每个view都有onSaveInstanceState方法和onRestoreInstanceState方法。</li>
+</ul>
+</blockquote>
+<h4 id="Activity与Fragment生命周期关系"><a href="#Activity与Fragment生命周期关系" class="headerlink" title="Activity与Fragment生命周期关系"></a>Activity与Fragment生命周期关系</h4><p>创建过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Fragment  onAttach() -&gt; onCreateView() -&gt; onCreat()</span><br><span class="line">Activity  onCreat()</span><br><span class="line">Fragment  onActivityCreat()</span><br><span class="line">Activity  onStart()</span><br><span class="line">Fragment  onStart()</span><br><span class="line">Activity  onResume()</span><br><span class="line">Fragment  onResume()</span><br></pre></td></tr></table></figure></p>
+<p>销毁过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Fragment  onPause()</span><br><span class="line">Activity	onPause()</span><br><span class="line">Fragment	onStop()</span><br><span class="line">Activity	onStop()</span><br><span class="line">Fragment	onDestoryView()</span><br><span class="line">Fragment	onDestory()</span><br><span class="line">Fragment	onDetach()</span><br><span class="line">Activity	onDestory()</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>从子到父创建，从父到子显示。从子到父销毁  </p>
+</blockquote>
+<h4 id="Activity与menu创建先后顺序"><a href="#Activity与menu创建先后顺序" class="headerlink" title="Activity与menu创建先后顺序"></a>Activity与menu创建先后顺序</h4><p>在activity创建完回调onResume后创建menu，回调onCreateOptionsMenu</p>
 
       
     </div>
@@ -442,8 +468,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -492,6 +527,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件"><span class="nav-number">1.</span> <span class="nav-text">四大组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity"><span class="nav-number">1.1.</span> <span class="nav-text">Activity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#生命周期"><span class="nav-number">1.1.1.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与Fragment生命周期关系"><span class="nav-number">1.1.2.</span> <span class="nav-text">Activity与Fragment生命周期关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与menu创建先后顺序"><span class="nav-number">1.1.3.</span> <span class="nav-text">Activity与menu创建先后顺序</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
