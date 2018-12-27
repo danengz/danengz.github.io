@@ -110,7 +110,7 @@
 <meta property="og:description" content="Android基础知识中的一些重点和容易忽略的点">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoururl.com/images/activytyLiftCircle.png">
-<meta property="og:updated_time" content="2018-12-25T03:14:01.567Z">
+<meta property="og:updated_time" content="2018-12-27T04:57:56.025Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android基础需要注意的问题">
 <meta name="twitter:description" content="Android基础知识中的一些重点和容易忽略的点">
@@ -321,12 +321,24 @@
                 
               
 
-              <time title="创建时间：2018-12-25 09:23:25 / 修改时间：11:14:01" itemprop="dateCreated datePublished" datetime="2018-12-25T09:23:25+08:00">2018-12-25</time>
+              <time title="创建时间：2018-12-25 09:23:25" itemprop="dateCreated datePublished" datetime="2018-12-25T09:23:25+08:00">2018-12-25</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-12-27 12:57:56" itemprop="dateModified" datetime="2018-12-27T12:57:56+08:00">2018-12-27</time>
               
             
           </span>
@@ -390,6 +402,65 @@
 <li>为一个activity的taskAffinity设置一个空字符串，表明这个activity不属于任何task</li>
 <li>singleTask 在这个模式下，如果栈中存在这个Activity的实例就会复用这个Activity，不管它是否位于栈顶，复用时，会将它上面的Activity全部出栈</li>
 <li>singleInstance 该模式具备singleTask模式的所有特性外，与它的区别就是，这种模式下的Activity会单独占用一个Task栈</li>
+</ul>
+</blockquote>
+<h3 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h3><h4 id="本地服务（LocalService）"><a href="#本地服务（LocalService）" class="headerlink" title="本地服务（LocalService）"></a>本地服务（LocalService）</h4><blockquote>
+<ul>
+<li>调用者和service在同一个进程里，所以运行在主进程的main线程中。所以不能进行耗时操作，可以采用在service里面创建一个Thread来执行任务。</li>
+<li>任何 Activity 都可以控制同一 Service，而系统也只会创建一个对应 Service 的实例。</li>
+</ul>
+</blockquote>
+<h5 id="启动方式"><a href="#启动方式" class="headerlink" title="启动方式"></a>启动方式</h5><ul>
+<li>通过start方式开启<h6 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h6><blockquote>
+<p>一旦服务开启就跟调用者（开启者）没有任何关系了。开启者退出了，开启者挂了，服务还在后台长期的运行，开启者不能调用服务里面的方法。</p>
+</blockquote>
+<h6 id="启动步骤"><a href="#启动步骤" class="headerlink" title="启动步骤"></a>启动步骤</h6><blockquote>
+<ol>
+<li>定义一个类继承service</li>
+<li>manifest.xml文件中配置service</li>
+<li>使用context的startService(Intent)方法启动service</li>
+<li>不在使用时，调用stopService(Intent)方法停止服务</li>
+</ol>
+</blockquote>
+<h6 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h6><blockquote>
+<p>onCreate() – &gt; onStartCommand() – &gt; onDestory()<br>如果服务已经开启，不会重复回调onCreate()方法，如果再次调用context.startService()方法，service而是会调用onStart()或者onStartCommand()方法。停止服务需要调用context.stopService()方法，服务停止的时候回调onDestory被销毁。</p>
+</blockquote>
+</li>
+<li>通过bind方式开启<h6 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h6><blockquote>
+<p>bind的方式开启服务，绑定服务，调用者挂了，服务也会跟着挂掉。绑定者可以调用服务里面的方法</p>
+</blockquote>
+<h6 id="启动步骤-1"><a href="#启动步骤-1" class="headerlink" title="启动步骤"></a>启动步骤</h6><blockquote>
+<ol>
+<li>定义一个类继承Service</li>
+<li>在manifest.xml文件中注册service</li>
+<li>使用context的bindService(Intent,ServiceConnection,int)方法启动service。（ServiceConnection如下）</li>
+<li>不再使用时，调用unbindService(ServiceConnection)方法停止该服务</li>
+</ol>
+</blockquote>
+<h6 id="ServiceConnection"><a href="#ServiceConnection" class="headerlink" title="ServiceConnection"></a>ServiceConnection</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">class MyServiceConnection implements ServiceConnection &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void onServiceConnected(ComponentName name, IBinder service) &#123;</span><br><span class="line">        IBinder就是Service中的onBind方法返回的</span><br><span class="line">        myBinder = (MyService.MyBinder) service;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onServiceDisconnected(ComponentName name) &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h6 id="生命周期-1"><a href="#生命周期-1" class="headerlink" title="生命周期"></a>生命周期</h6><blockquote>
+<p>onCreate() – &gt; onBind() –&gt; onUnbind() – &gt; onDestory()</p>
+</blockquote>
+<h4 id="远程服务"><a href="#远程服务" class="headerlink" title="远程服务"></a>远程服务</h4><blockquote>
+<p>调用者和service不在同一个进程中，service在单独的进程中的main线程，是一种垮进程通信方式</p>
+</blockquote>
+<h4 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h4><blockquote>
+<p>Service本身存在两个问题：</p>
+<ul>
+<li>Service不会专门启动一条单独的进程，Service与它所在应用位于同一个进程中</li>
+<li>Service也不是专门一条新线程，因此不应该在Service中直接处理耗时的任务</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>IntentService特征:</p>
+<ul>
+<li>会创建独立的线程来处理所有的Intent请求</li>
+<li>会创建独立的线程来处理onHandleIntent()方法实现的代码，无需处理多线程问题</li>
+<li>所有请求处理完成后，IntentService会自动停止，无需调用stopSelf()方法停止Service</li>
+<li>为Service的onBind()提供默认实现，返回null</li>
+<li>为Service的onStartCommand提供默认实现，将请求Intent添加到队列中</li>
 </ul>
 </blockquote>
 
@@ -545,7 +616,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件"><span class="nav-number">1.</span> <span class="nav-text">四大组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity"><span class="nav-number">1.1.</span> <span class="nav-text">Activity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity生命周期"><span class="nav-number">1.1.1.</span> <span class="nav-text">Activity生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与Fragment生命周期关系"><span class="nav-number">1.1.2.</span> <span class="nav-text">Activity与Fragment生命周期关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与menu创建先后顺序"><span class="nav-number">1.1.3.</span> <span class="nav-text">Activity与menu创建先后顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity启动模式"><span class="nav-number">1.1.4.</span> <span class="nav-text">Activity启动模式</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件"><span class="nav-number">1.</span> <span class="nav-text">四大组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity"><span class="nav-number">1.1.</span> <span class="nav-text">Activity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity生命周期"><span class="nav-number">1.1.1.</span> <span class="nav-text">Activity生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与Fragment生命周期关系"><span class="nav-number">1.1.2.</span> <span class="nav-text">Activity与Fragment生命周期关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与menu创建先后顺序"><span class="nav-number">1.1.3.</span> <span class="nav-text">Activity与menu创建先后顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity启动模式"><span class="nav-number">1.1.4.</span> <span class="nav-text">Activity启动模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service"><span class="nav-number">1.2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本地服务（LocalService）"><span class="nav-number">1.2.1.</span> <span class="nav-text">本地服务（LocalService）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#启动方式"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">启动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#特点"><span class="nav-number">1.2.1.1.1.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤"><span class="nav-number">1.2.1.1.2.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期"><span class="nav-number">1.2.1.1.3.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#特点-1"><span class="nav-number">1.2.1.1.4.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤-1"><span class="nav-number">1.2.1.1.5.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#ServiceConnection"><span class="nav-number">1.2.1.1.6.</span> <span class="nav-text">ServiceConnection</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期-1"><span class="nav-number">1.2.1.1.7.</span> <span class="nav-text">生命周期</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#远程服务"><span class="nav-number">1.2.2.</span> <span class="nav-text">远程服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IntentService"><span class="nav-number">1.2.3.</span> <span class="nav-text">IntentService</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
