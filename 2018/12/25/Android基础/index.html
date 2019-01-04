@@ -110,7 +110,7 @@
 <meta property="og:description" content="Android基础知识中的一些重点和容易忽略的点">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoururl.com/images/activytyLiftCircle.png">
-<meta property="og:updated_time" content="2018-12-27T04:57:56.025Z">
+<meta property="og:updated_time" content="2019-01-04T03:04:48.557Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android基础需要注意的问题">
 <meta name="twitter:description" content="Android基础知识中的一些重点和容易忽略的点">
@@ -338,7 +338,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-27 12:57:56" itemprop="dateModified" datetime="2018-12-27T12:57:56+08:00">2018-12-27</time>
+                <time title="修改时间：2019-01-04 11:04:48" itemprop="dateModified" datetime="2019-01-04T11:04:48+08:00">2019-01-04</time>
               
             
           </span>
@@ -463,6 +463,62 @@
 <li>为Service的onStartCommand提供默认实现，将请求Intent添加到队列中</li>
 </ul>
 </blockquote>
+<h3 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h3><blockquote>
+<p>广播被分为两种不同的类型：“普通广播（Normal broadcasts）”和“有序广播（Ordered broadcasts）”。普通广播是完全异步的，可以在同一时刻（逻辑上）被所有接收者接收到，消息传递的效率比较高，但缺点是：接收者不能将处理结果传递给下一个接收者，并且无法终止广播Intent的传播；然而有序广播是按照接收者声明的优先级别（声明在intent-filter元素的android:priority属性中，数越大优先级别越高,取值范围:-1000到1000。也可以调用IntentFilter对象的setPriority()进行设置），被接收者依次接收广播。如：A的级别高于B,B的级别高于C,那么，广播先传给A，再传给B，最后传给C。A得到广播后，可以往广播里存入数据，当广播传给B时,B可以从广播中得到A存入的数据。</p>
+</blockquote>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><blockquote>
+<ul>
+<li>自定义一个类继承BroadcastReceiver</li>
+<li>重写onReceive方法</li>
+<li>在manifest.xml中注册</li>
+</ul>
+</blockquote>
+<h4 id="生命周期-2"><a href="#生命周期-2" class="headerlink" title="生命周期"></a>生命周期</h4><p>如果一个广播处理完onReceive 那么系统将认定此对象将不再是一个活动的对象，也就会finished掉它。</p>
+<h4 id="发送广播"><a href="#发送广播" class="headerlink" title="发送广播"></a>发送广播</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Context.sendBroadcast()</span><br><span class="line">发送的是普通广播，所有订阅者都有机会获得并进行处理。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Context.sendOrderedBroadcast()</span><br><span class="line">发送的是有序广播，系统会根据接收者声明的优先级别按顺序逐个执行接收者，前面的接收者有权终止广播(BroadcastReceiver.abortBroadcast())，如果广播被前面的接收者终止，后面的接收者就再也无法获取到广播。对于有序广播，前面的接收者可以将处理结果通过setResultExtras(Bundle)方法存放进结果对象，然后传给下一个接收者，通过代码：Bundle bundle =getResultExtras(true))可以获取上一个接收者存入在结果对象中的数据。</span><br><span class="line">系统收到短信，发出的广播属于有序广播。如果想阻止用户收到短信，可以通过设置优先级，让你们自定义的接收者先获取到广播，然后终止广播，这样用户就接收不到短信了。</span><br></pre></td></tr></table></figure>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//创建BroadcastReceiver</span><br><span class="line">public class MyBroadcastReceiver extends BroadcastReceiver &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onReceive(Context context, Intent intent) &#123;</span><br><span class="line">        Log.i(&quot;fuck&quot;,&quot;intent-action : &quot; + intent.getAction());</span><br><span class="line">        if(intent.getAction().equals(&quot;test&quot;))&#123;</span><br><span class="line">            Toast.makeText(context,&quot;fuck&quot;,Toast.LENGTH_LONG).show();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//静态注册</span><br><span class="line">        &lt;receiver android:name=&quot;.broadcast.MyBroadcastReceiver&quot;&gt;</span><br><span class="line"></span><br><span class="line">            &lt;intent-filter&gt;</span><br><span class="line">                &lt;action android:name=&quot;android.intent.action.ACTION_POWER_CONNECTED&quot; /&gt;</span><br><span class="line">                &lt;action android:name=&quot;test&quot;/&gt;//这里自定义一个广播动作</span><br><span class="line">            &lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">        &lt;/receiver&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//动态注册</span><br><span class="line">registerReceiver(new MyBroadcastReceiver(),new IntentFilter(&quot;test&quot;));</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//发送</span><br><span class="line">Intent intent = new Intent(&quot;test&quot;);</span><br><span class="line">sendBroadcast(intent);</span><br></pre></td></tr></table></figure>
+<h4 id="静态注册和动态注册区别"><a href="#静态注册和动态注册区别" class="headerlink" title="静态注册和动态注册区别"></a>静态注册和动态注册区别</h4><p>动态注册广播不是常驻型广播，也就是说广播跟随activity的生命周期。注意: 在activity结束前，移除广播接收器。<br>静态注册是常驻型，也就是说当应用程序关闭后，如果有信息广播来，程序也会被系统调用自动运行。</p>
+<p>当广播为有序广播时：</p>
+<ul>
+<li>优先级高的先接收</li>
+<li>同优先级的广播接收器，动态优先于静态</li>
+<li>同优先级的同类广播接收器，静态：先扫描的优先于后扫描的，动态：先注册的优先于后注册的。</li>
+</ul>
+<p>当广播为普通广播时：</p>
+<ul>
+<li>无视优先级，动态广播接收器优先于静态广播接收器</li>
+<li>同优先级的同类广播接收器，静态：先扫描的优先于后扫描的，动态：先注册的优先于后注册的。</li>
+</ul>
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><blockquote>
+<ul>
+<li>如果在AndroidManifest.xml中注册，当应用程序关闭的时候，也会接收到广播。在应用程序中注册就不产生这种情况了</li>
+<li>每次接收广播都会重新生成一个接收广播的对象</li>
+<li>在BroadCastReceiver中尽量不要处理太多逻辑问题，建议复杂的逻辑交给Activity 或者 Service 去处理</li>
+<li>当如果要进行的操作需要花费比较长的时间，则不适合放在BroadcastReceiver中进行处理。</li>
+<li>在 Android 中，程序的响应（ Responsive ）被活动管理器（ Activity Manager ）和窗口管理器（ Window Manager ）这两个系统服务所监视。当 BroadcastReceiver 在 10 秒内没有执行完毕，Android 会认为该程序无响应。所以在 BroadcastReceiver 里不能做一些比较耗时的操作，否侧会弹出ANR （ Application No Response ）的对话框。如果需要完成一项比较耗时的工作，应该通过发送Intent 给 Service ，由 Service 来完成。而不是使用子线程的方法来解决，因为 BroadcastReceiver 的生命周期很短（在 onReceive() 执行后 BroadcastReceiver 的实例就会被销毁），子线程可能还没有结束BroadcastReceiver 就先结束了。如果 BroadcastReceiver 结束了，它的宿主进程还在运行，那么子线程还会继续执行。但宿主进程此时很容易在系统需要内存时被优先杀死，因为它属于空进程（没有任何活动组件的进程）。</li>
+</ul>
+</blockquote>
+<h3 id="ContentProvider"><a href="#ContentProvider" class="headerlink" title="ContentProvider"></a>ContentProvider</h3><h4 id="使用系统的ContentProvider"><a href="#使用系统的ContentProvider" class="headerlink" title="使用系统的ContentProvider"></a>使用系统的ContentProvider</h4><blockquote>
+<ul>
+<li>获取ContentResolver实例</li>
+<li>确定Uri的内容，并解析为具体的Uri实例</li>
+<li>通过ContentResolver实例来调用相应的方法，传递相应的参数，但是第一个参数总是Uri，它制定了我们要操作的数据的具体地址</li>
+</ul>
+</blockquote>
+<h4 id="自定义ContentProvider"><a href="#自定义ContentProvider" class="headerlink" title="自定义ContentProvider"></a>自定义ContentProvider</h4><blockquote>
+<ul>
+<li>重新实现一个类</li>
+<li>重写这个类中的抽象方法(oncreate, query, update, insert, delete, gettype)</li>
+<li>在清单文件中注册</li>
+</ul>
+</blockquote>
+<p>oncreate方法应该是内容提供者创建的时候所执行的一个回调方法，负责数据库的创建和更新操作。这个方法只有我们在程序中获取ContentResolver实例之后准备访问共享数据的时候，才会被执行。<br>gettype方法是获取我们通过参数传递进去的Uri的MIME类型。 简单来讲，MIME类型就是用来标识当前的Activity所能打开的文件类型</p>
+<p>简单列出来系统中自带的几种文件类型和对应的MIME类型（前面是文件名，后面是对应的MIME类型字符串）：<br>{“.bmp”, “image/bmp”}<br>{“.c”, “text/plain”}<br>{“.class”, “application/octet-stream”}<br>{“.conf”, “text/plain”}<br>{“.cpp”, “text/plain”}<br>{“.doc”, “application/msword”}</p>
+<p>MIME类型有什么用<br>首先，MIME类型主要是Activity的Intent-filter的data域;比如下面这个Activity:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;activity</span><br><span class="line">    android:name=&quot;.SecondActivity&quot;</span><br><span class="line">    android:label=&quot;@string/title_activity_second&quot; &gt;</span><br><span class="line">    &lt;intent-filter&gt;</span><br><span class="line">        &lt;action android:name=&quot;harvic.test.qijian&quot;/&gt;</span><br><span class="line">        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</span><br><span class="line">        &lt;data android:mimeType=&quot;image/bmp&quot;/&gt;</span><br><span class="line">    &lt;/intent-filter&gt;</span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure></p>
+<p>这里指定了data域的MimeType值是”image/bmp”，即在利用隐式Intent匹配时，只有指定MimeType是”image/bmp”时，才能启用这个Activity，也就是说，这个Activity只能打开image/bmp类型的文件！！！！这才是MIME类型匹配的重点；<br>所以MIME类型在Activity中是用来指定，当前的Activity所支持打开的文件类型！！<br>MIME详解原文：<a href="https://blog.csdn.net/harvic880925/article/details/44620851" target="_blank" rel="noopener">https://blog.csdn.net/harvic880925/article/details/44620851</a>  </p>
 
       
     </div>
@@ -616,7 +672,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件"><span class="nav-number">1.</span> <span class="nav-text">四大组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity"><span class="nav-number">1.1.</span> <span class="nav-text">Activity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity生命周期"><span class="nav-number">1.1.1.</span> <span class="nav-text">Activity生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与Fragment生命周期关系"><span class="nav-number">1.1.2.</span> <span class="nav-text">Activity与Fragment生命周期关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与menu创建先后顺序"><span class="nav-number">1.1.3.</span> <span class="nav-text">Activity与menu创建先后顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity启动模式"><span class="nav-number">1.1.4.</span> <span class="nav-text">Activity启动模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service"><span class="nav-number">1.2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本地服务（LocalService）"><span class="nav-number">1.2.1.</span> <span class="nav-text">本地服务（LocalService）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#启动方式"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">启动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#特点"><span class="nav-number">1.2.1.1.1.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤"><span class="nav-number">1.2.1.1.2.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期"><span class="nav-number">1.2.1.1.3.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#特点-1"><span class="nav-number">1.2.1.1.4.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤-1"><span class="nav-number">1.2.1.1.5.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#ServiceConnection"><span class="nav-number">1.2.1.1.6.</span> <span class="nav-text">ServiceConnection</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期-1"><span class="nav-number">1.2.1.1.7.</span> <span class="nav-text">生命周期</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#远程服务"><span class="nav-number">1.2.2.</span> <span class="nav-text">远程服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IntentService"><span class="nav-number">1.2.3.</span> <span class="nav-text">IntentService</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件"><span class="nav-number">1.</span> <span class="nav-text">四大组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity"><span class="nav-number">1.1.</span> <span class="nav-text">Activity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity生命周期"><span class="nav-number">1.1.1.</span> <span class="nav-text">Activity生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与Fragment生命周期关系"><span class="nav-number">1.1.2.</span> <span class="nav-text">Activity与Fragment生命周期关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity与menu创建先后顺序"><span class="nav-number">1.1.3.</span> <span class="nav-text">Activity与menu创建先后顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity启动模式"><span class="nav-number">1.1.4.</span> <span class="nav-text">Activity启动模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service"><span class="nav-number">1.2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本地服务（LocalService）"><span class="nav-number">1.2.1.</span> <span class="nav-text">本地服务（LocalService）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#启动方式"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">启动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#特点"><span class="nav-number">1.2.1.1.1.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤"><span class="nav-number">1.2.1.1.2.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期"><span class="nav-number">1.2.1.1.3.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#特点-1"><span class="nav-number">1.2.1.1.4.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#启动步骤-1"><span class="nav-number">1.2.1.1.5.</span> <span class="nav-text">启动步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#ServiceConnection"><span class="nav-number">1.2.1.1.6.</span> <span class="nav-text">ServiceConnection</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#生命周期-1"><span class="nav-number">1.2.1.1.7.</span> <span class="nav-text">生命周期</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#远程服务"><span class="nav-number">1.2.2.</span> <span class="nav-text">远程服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IntentService"><span class="nav-number">1.2.3.</span> <span class="nav-text">IntentService</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BroadcastReceiver"><span class="nav-number">1.3.</span> <span class="nav-text">BroadcastReceiver</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤"><span class="nav-number">1.3.1.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生命周期-2"><span class="nav-number">1.3.2.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#发送广播"><span class="nav-number">1.3.3.</span> <span class="nav-text">发送广播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#示例"><span class="nav-number">1.3.4.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#静态注册和动态注册区别"><span class="nav-number">1.3.5.</span> <span class="nav-text">静态注册和动态注册区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#注意"><span class="nav-number">1.3.6.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContentProvider"><span class="nav-number">1.4.</span> <span class="nav-text">ContentProvider</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用系统的ContentProvider"><span class="nav-number">1.4.1.</span> <span class="nav-text">使用系统的ContentProvider</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自定义ContentProvider"><span class="nav-number">1.4.2.</span> <span class="nav-text">自定义ContentProvider</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -636,7 +692,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
